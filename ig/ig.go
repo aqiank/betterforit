@@ -23,6 +23,7 @@ func init() {
 func Run(us []user.User, sigC chan os.Signal) {
         log.Println("instagram: starting..")
         log.Println("instagram: rate is set to", cfg.InstagramRate())
+        log.Println("instagram: minDate is set to", cfg.InstagramMinDate())
 
         go func() {
                 last := 0
@@ -68,7 +69,7 @@ func downloadUserMedia(u user.User, sigC chan os.Signal) {
         downloadProfilePic(igUsers[0], dst)
 
         prevMaxID := ""
-        minTimestamp, _ := time.Parse("2006-01-02", "2015-02-01")
+        minTimestamp, _ := time.Parse("2006-01-02", cfg.InstagramMinDate())
         params := &instagram.Parameters{Count: 1, MinTimestamp: minTimestamp.Unix()}
         for {
                 medias, next, err := ig.Users.RecentMedia(igUsers[0].ID, params)

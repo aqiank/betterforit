@@ -11,13 +11,17 @@ var config = struct {
         LastInstagramUser string `json:last_instagram_user`
         TwitterRate string `json:"twitter_rate"`
         TwitterCount int `json:"twitter_count"`
+        TwitterUseSearch bool `json:"twitter_use_search"`
         InstagramRate int `json:"instagram_rate"`
+        InstagramMinDate string `json:"instagram_min_date"`
 }{
         "1",
         "1",
         "2",
         33,
+        true,
         1,
+        "2015-04-16",
 }
 
 func Load() {
@@ -72,6 +76,14 @@ func TwitterCount() int {
         return config.TwitterCount
 }
 
+func TwitterUseSearch() bool {
+        return config.TwitterUseSearch
+}
+
 func InstagramRate() int {
         return config.InstagramRate
+}
+
+func InstagramMinDate() string {
+        return config.InstagramMinDate
 }
