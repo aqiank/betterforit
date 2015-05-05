@@ -123,7 +123,7 @@ func downloadUserMedia(u user.User, sigC chan os.Signal) {
                                 }
 
                                 // download images
-                		if err := net.Download(tweetDst, media.Media_url, ""); err == nil {
+                                if err := net.Download(tweetDst, media.Media_url, ""); err != nil {
                                         log.Println("twitter: downloadUserMedia:", err)
                                 }
                         }
