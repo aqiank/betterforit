@@ -74,8 +74,10 @@ func downloadUserMedia(u user.User, sigC chan os.Signal) {
 
         log.Printf("twitter: searching [%s %s %s]\n", u.No, u.Fullname, username)
 
-        // download profile pic
-        downloadProfilePic(tu, dst)
+        // download profile pic if available
+        if !tu.DefaultProfileImage {
+                downloadProfilePic(tu, dst)
+        }
 
         maxID := ""
         cnt := cfg.TwitterCount()
@@ -136,5 +138,6 @@ func downloadProfilePic(tu anaconda.User, dst string) {
         if util.Exists(dst + "/profile.jpg") {
                 return
         }
-        net.Download(dst, tu.ProfileImageURL, "profile.jpg")
+        url := strings.Replace(tu.ProfileImageURL, "_normal", "", -1)
+        net.Download(dst, url, "profile.jpg")
 }
