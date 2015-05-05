@@ -79,5 +79,6 @@ func SaveText(destDir, text, name string) error {
                 return fmt.Errorf("SaveText: %v", err)
         }
 
+        log.Println("saved text:", text)
         return nil
 }
