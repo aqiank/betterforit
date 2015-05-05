@@ -113,7 +113,7 @@ func downloadUserMedia(u user.User, sigC chan os.Signal) {
 
                         log.Println("twitter: found tweet with #betterforit hashtag")
 
-                        // donwload tweet
+                        // download tweet
                         tweetDst := dst + "/" + tweet.IdStr
                         net.SaveText(tweetDst, tweet.Text, "tweet.txt")
 
