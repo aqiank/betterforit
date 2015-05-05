@@ -3,6 +3,7 @@ package ig
 import (
         "log"
         "os"
+        "path"
         "strings"
         "time"
 
@@ -21,6 +22,7 @@ func init() {
 
 func Run(us []user.User, sigC chan os.Signal) {
         log.Println("instagram: starting..")
+        log.Println("instagram: rate is set to", cfg.InstagramRate())
 
         go func() {
                 last := 0
@@ -47,6 +49,7 @@ func Run(us []user.User, sigC chan os.Signal) {
 
 func downloadUserMedia(u user.User, sigC chan os.Signal) {
         username := strings.Trim(u.InstagramHandle, "@")
+        dst := "downloads/instagram/" + u.No + " " + u.Fullname + " " + username
 
         igUsers, _, err := ig.Users.Search(username, &instagram.Parameters{Count: uint64(cfg.InstagramRate())})
         if err != nil {
@@ -61,6 +64,9 @@ func downloadUserMedia(u user.User, sigC chan os.Signal) {
 
         log.Printf("instagram: searching [%s %s %s]\n", u.No, u.Fullname, username)
 
+        // download profile pic
+        downloadProfilePic(igUsers[0], dst)
+
         prevMaxID := ""
         minTimestamp, _ := time.Parse("2006-01-02", "2015-02-01")
         params := &instagram.Parameters{Count: 1, MinTimestamp: minTimestamp.Unix()}
@@ -71,16 +77,19 @@ func downloadUserMedia(u user.User, sigC chan os.Signal) {
                        return
                 }
 
+                // look for photos that have #betterforit hashtag
                 for _, m := range medias {
         		if m.Type != "image" {
         			continue
         		}
                         for _, tag := range m.Tags {
                                 if tag == "betterforit" {
-                                        dst := "downloads/instagram/" + u.No + " " + u.Fullname + " " + username
-                                        os.MkdirAll(dst, os.ModeDir | 0700)
-                        		if err = net.Download(dst, m.Images.StandardResolution.URL); err == nil {
-                                                downloadProfilePic(igUsers[0], dst)
+                                        // save caption
+                                        saveCaption(m, dst, m.Images.StandardResolution.URL)
+
+                                        // download image
+                        		if err := net.Download(dst, m.Images.StandardResolution.URL, ""); err != nil {
+                                                log.Println("instagram: downloadUserMedia:", err)
                                         }
                                         break
                                 }
@@ -101,10 +110,17 @@ func downloadUserMedia(u user.User, sigC chan os.Signal) {
         }
 }
 
-
 func downloadProfilePic(u instagram.User, dst string) {
         if util.Exists(dst + "/profile.jpg") {
                 return
         }
-        net.DownloadAs(dst, u.ProfilePicture, "profile.jpg")
+
+        if err := net.Download(dst, u.ProfilePicture, "profile.jpg"); err != nil {
+                log.Println("instagram: downloadProfilePic:", err)
+        }
+}
+
+func saveCaption(media instagram.Media, dst, mediaUrl string) {
+        name := path.Base(mediaUrl) + ".txt"
+        net.SaveText(dst, media.Caption.Text, name)
 }

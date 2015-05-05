@@ -32,6 +32,7 @@ func init() {
 func Run(us []user.User, sigC chan os.Signal) {
         log.Println("twitter: starting..")
         log.Println("twitter: rate is set to", cfg.TwitterRate())
+        log.Println("twitter: count is set to", cfg.TwitterCount())
 
         go func() {
                 last := 0
@@ -58,6 +59,8 @@ func Run(us []user.User, sigC chan os.Signal) {
 
 func downloadUserMedia(u user.User, sigC chan os.Signal) {
         username := strings.Trim(u.TwitterHandle, "@")
+        dst := "downloads/twitter/" + u.No + " " + u.Fullname + " " + username
+
         params := url.Values{}
         params.Set("screen_name", username)
         params.Set("count", cfg.TwitterRate())
@@ -70,6 +73,9 @@ func downloadUserMedia(u user.User, sigC chan os.Signal) {
         }
 
         log.Printf("twitter: searching [%s %s %s]\n", u.No, u.Fullname, username)
+
+        // download profile pic
+        downloadProfilePic(tu, dst)
 
         maxID := ""
         cnt := cfg.TwitterCount()
@@ -105,15 +111,18 @@ func downloadUserMedia(u user.User, sigC chan os.Signal) {
 
                         log.Println("twitter: found tweet with #betterforit hashtag")
 
+                        // donwload tweet
+                        tweetDst := dst + "/" + tweet.IdStr
+                        net.SaveText(tweetDst, tweet.Text, "tweet.txt")
+
                         for _, media := range tweet.Entities.Media {
                                 if media.Type != "photo" {
                                         continue
                                 }
 
-                                dst := "downloads/twitter/" + u.No + " " + u.Fullname + " " + username
-                                os.MkdirAll(dst, os.ModeDir | 0700)
-                		if err := net.Download(dst, media.Media_url); err == nil {
-                                        downloadProfilePic(tu, dst)
+                                // download images
+                		if err := net.Download(tweetDst, media.Media_url, ""); err == nil {
+                                        log.Println("twitter: downloadUserMedia:", err)
                                 }
                         }
                 }
@@ -127,5 +136,5 @@ func downloadProfilePic(tu anaconda.User, dst string) {
         if util.Exists(dst + "/profile.jpg") {
                 return
         }
-        net.DownloadAs(dst, tu.ProfileImageURL, "profile.jpg")
+        net.Download(dst, tu.ProfileImageURL, "profile.jpg")
 }
