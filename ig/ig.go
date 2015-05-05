@@ -84,7 +84,7 @@ func downloadUserMedia(u user.User, sigC chan os.Signal) {
         			continue
         		}
                         for _, tag := range m.Tags {
-                                if tag == "betterforit" {
+                                if strings.EqualFold(tag, "betterforit") || strings.EqualFold(tag, "werunmanila") {
                                         // save caption
                                         saveCaption(m, dst, m.Images.StandardResolution.URL)
 

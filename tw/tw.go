@@ -172,7 +172,7 @@ func downloadByUserTimeline(dst, username string) {
                         maxID = tweet.IdStr
 
                         for _, tag := range tweet.Entities.Hashtags {
-                                if strings.EqualFold(tag.Text, "betterforit") {
+                                if strings.EqualFold(tag.Text, "betterforit")  || strings.EqualFold(tag.Text, "werunmnl") {
                                         hasTag = true
                                 }
                         }
@@ -181,7 +181,7 @@ func downloadByUserTimeline(dst, username string) {
                                 continue
                         }
 
-                        log.Println("twitter: found tweet with #betterforit hashtag")
+                        log.Println("twitter: found tweet with #BetterForIt or #WeRunMNL hashtag")
 
                         // download tweet
                         tweetDst := dst + "/" + tweet.IdStr
